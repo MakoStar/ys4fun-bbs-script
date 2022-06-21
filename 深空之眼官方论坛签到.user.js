@@ -14,12 +14,12 @@
     'use strict';
 
     // 本地存储的 dzq-server-id
-    let __dzq = localStorage.getItem('__dzq-server-id')
+    const __dzq = localStorage.getItem('__dzq-server-id')
 
     // 发起请求查询登录状态
     async function isLogin(dzq) {
-        let response = await fetch(`https://bbs.ys4fun.com/api/v3/tom.permissions?dzqSid=${dzq}&dzqPf=pc`)
-        let result = await response.json()
+        const response = await fetch(`https://bbs.ys4fun.com/api/v3/tom.permissions?dzqSid=${dzq}&dzqPf=pc`)
+        const result = await response.json()
         if (result.Code === -4002) {
             return false
         }else {
@@ -29,8 +29,8 @@
 
     // 获取每日任务完成进度
     async function getTheDailyTaskState(dzq) {
-        let response = await fetch(`https://bbs.ys4fun.com/plugin/ysGrow/api/grow/today?dzqSid=${dzq}&dzqPf=pc`)
-        let result = await response.json()
+        const response = await fetch(`https://bbs.ys4fun.com/plugin/ysGrow/api/grow/today?dzqSid=${dzq}&dzqPf=pc`)
+        const result = await response.json()
         return result.Data
     }
 
@@ -53,9 +53,9 @@
     // 获取帖子 post 请求 id
     async function getPostRequestId(dzq) {
         let resultArr = []
-        let pageIdArr = await getPageThreadId()
-        for (let i of pageIdArr) {
-            let queryData = await getRequestData(i, dzq)
+        const pageIdArr = await getPageThreadId()
+        for (const i of pageIdArr) {
+            const queryData = await getRequestData(i, dzq)
             resultArr.push(queryData)
         }
         return resultArr
@@ -63,8 +63,8 @@
 
     // 发送请求获取页面请求数据
     async function getRequestData(pageId, dzq) {
-        let response = await fetch(`https://bbs.ys4fun.com/api/v3/thread.detail?threadId=${pageId}&dzqSid=${dzq}&dzqPf=pc`)
-        let result = await response.json()
+        const response = await fetch(`https://bbs.ys4fun.com/api/v3/thread.detail?threadId=${pageId}&dzqSid=${dzq}&dzqPf=pc`)
+        const result = await response.json()
         return result.Data
     }
 
@@ -83,7 +83,7 @@
 
     // 更改点赞状态 + 评论
     function changeLikeState(requestData, state) {
-        for (let obj of requestData) {
+        for (const obj of requestData) {
             sendChangeLikeRequest(obj.threadId, obj.postId, state)
             postingMessage(obj.threadId, __dzq)
             share(obj.threadId, __dzq)
@@ -92,8 +92,8 @@
 
     // 获取话题标签
     async function getTopicsTag(dzq) {
-        let response = await fetch(`https://bbs.ys4fun.com/api/v3/topics.list?filter[thread]=1&filter[recommended]=1&dzqSid=${dzq}&dzqPf=pc`)
-        let result = await response.json()
+        const response = await fetch(`https://bbs.ys4fun.com/api/v3/topics.list?filter[thread]=1&filter[recommended]=1&dzqSid=${dzq}&dzqPf=pc`)
+        const result = await response.json()
         return result.Data.pageData[0].content
     }
 
@@ -159,22 +159,6 @@
                     createPost(__dzq, requestData)
                 })
             }
-            // else {
-            //     result.forEach((i,j) => {
-            //         // 每日签到、每日点赞、每日浏览帖子
-            //         if (i.name === '点赞' && i.integral < 10) {
-            //             getPostRequestId(__dzq).then((requestData) => {
-            //                 changeLikeState(requestData, true)
-            //             })
-            //         }
-            //         // 每日发帖
-            //         if (i.name === '发帖' && i.integral < 8) {
-            //             getTopicsTag(__dzq).then((requestData) => {
-            //                 createPost(__dzq, requestData)
-            //             })
-            //         }
-            //     })
-            // }
         })
     })
 
