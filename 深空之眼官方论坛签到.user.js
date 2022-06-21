@@ -86,6 +86,7 @@
         for (let obj of requestData) {
             sendChangeLikeRequest(obj.threadId, obj.postId, state)
             postingMessage(obj.threadId, __dzq)
+            share(obj.threadId, __dzq)
         }
     }
 
@@ -132,6 +133,12 @@
         })
     }
 
+    // 每日分享
+    function share(pageId, dzq) {
+        fetch(`https://bbs.ys4fun.com/api/v3/thread.share?dzqSid=${ dzq }&dzqPf=pc`, {
+            threadId: pageId
+        })
+    }
 
     // 判断查询到的登录状态进行下一步操作
     isLogin(__dzq).then(isLoginResult => {
@@ -151,22 +158,23 @@
                 getTopicsTag(__dzq).then((requestData) => {
                     createPost(__dzq, requestData)
                 })
-            }else {
-                result.forEach((i,j) => {
-                    // 每日签到、每日点赞、每日浏览帖子
-                    if (i.name === '点赞' && i.integral < 10) {
-                        getPostRequestId(__dzq).then((requestData) => {
-                            changeLikeState(requestData, true)
-                        })
-                    }
-                    // 每日发帖
-                    if (i.name === '发帖' && i.integral < 8) {
-                        getTopicsTag(__dzq).then((requestData) => {
-                            createPost(__dzq, requestData)
-                        })
-                    }
-                })
             }
+            // else {
+            //     result.forEach((i,j) => {
+            //         // 每日签到、每日点赞、每日浏览帖子
+            //         if (i.name === '点赞' && i.integral < 10) {
+            //             getPostRequestId(__dzq).then((requestData) => {
+            //                 changeLikeState(requestData, true)
+            //             })
+            //         }
+            //         // 每日发帖
+            //         if (i.name === '发帖' && i.integral < 8) {
+            //             getTopicsTag(__dzq).then((requestData) => {
+            //                 createPost(__dzq, requestData)
+            //             })
+            //         }
+            //     })
+            // }
         })
     })
 
