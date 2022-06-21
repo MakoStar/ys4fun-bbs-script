@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         深空之眼官方论坛签到
+// @name         深空之眼官方论坛脚本
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  论坛自动签到
+// @description  论坛每日任务脚本
 // @author       MakoStar
 // @match        *://bbs.ys4fun.com/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js
