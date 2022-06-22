@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         深空之眼官方论坛脚本
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  论坛每日任务脚本
+// @version      1.2
+// @description  打开论坛首页自动做每日任务
 // @author       MakoStar
-// @match        *://bbs.ys4fun.com/*
+// @match        *://bbs.ys4fun.com
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=ys4fun.com
 // @grant        none
@@ -12,6 +12,10 @@
 
 (function() {
     'use strict';
+
+    /**
+     * 暂时不优化了，能用就用着吧。
+     */
 
     // 本地存储的 dzq-server-id
     const __dzq = localStorage.getItem('__dzq-server-id')
@@ -78,7 +82,7 @@
             }
         })
             .then( response => response.json() )
-            .then( data => console.log(data) )
+            .then( data => console.log(['点赞', data]) )
     }
 
     // 更改点赞状态 + 评论
@@ -119,7 +123,25 @@
             }
         })
             .then( response => response.json() )
-            .then( data => console.log(data) )
+            .then( data => {
+                console.log(['发帖', data])
+                setTimeout(() => {
+                    deletePost(data.Data.threadId, dzq)
+                },2000)
+            } )
+    }
+
+    // 删除帖子
+    function deletePost(threadId, dzq) {
+        fetch(`https://bbs.ys4fun.com/api/v3/thread.delete?dzqSid=${ dzq }&dzqPf=pc`, {
+            method: 'POST',
+            body: JSON.stringify({threadId: threadId}),
+            headers: {
+                "Content-type":"application/json"
+            }
+        })
+            .then( response => response.json() )
+            .then( data => {console.log(['删帖', data])} )
     }
 
     // 发送评论
@@ -131,13 +153,21 @@
                 "Content-type":"application/json"
             }
         })
+            .then( response => response.json() )
+            .then( data => {console.log(['评论', data])} )
     }
 
     // 每日分享
     function share(pageId, dzq) {
         fetch(`https://bbs.ys4fun.com/api/v3/thread.share?dzqSid=${ dzq }&dzqPf=pc`, {
-            threadId: pageId
+            method: 'POST',
+            body: JSON.stringify({threadId: pageId}),
+            headers: {
+                "Content-type":"application/json"
+            }
         })
+            .then( response => response.json() )
+            .then( data => {console.log(['分享', data])} )
     }
 
     // 判断查询到的登录状态进行下一步操作
@@ -148,16 +178,20 @@
             }, 2000)
             return
         }
+
         // 查询每日任务完成状态 未完成的执行相应操作
         getTheDailyTaskState(__dzq).then(result => {
             console.log(result)
-            if (result.length === 1 && result[0].name === '签到') {
+            if (result.length === 1 || result.length <= 7 || result === []) {
                 getPostRequestId(__dzq).then((requestData) => {
                     changeLikeState(requestData, true)
                 })
+
                 getTopicsTag(__dzq).then((requestData) => {
                     createPost(__dzq, requestData)
                 })
+            }else {
+               console.log(['每日任务已完成', result])
             }
         })
     })
