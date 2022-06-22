@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         深空之眼官方论坛脚本
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  打开论坛首页自动做每日任务
 // @author       MakoStar
-// @match        *://bbs.ys4fun.com
+// @match        *://bbs.ys4fun.com/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=ys4fun.com
 // @grant        none
@@ -159,6 +159,7 @@
 
     // 每日分享
     function share(pageId, dzq) {
+
         fetch(`https://bbs.ys4fun.com/api/v3/thread.share?dzqSid=${ dzq }&dzqPf=pc`, {
             method: 'POST',
             body: JSON.stringify({threadId: pageId}),
@@ -170,30 +171,49 @@
             .then( data => {console.log(['分享', data])} )
     }
 
-    // 判断查询到的登录状态进行下一步操作
-    isLogin(__dzq).then(isLoginResult => {
-        if (!isLoginResult) {
-            setTimeout(()=>{
-                alert('当前处与访客状态请登录！')
-            }, 2000)
-            return
-        }
+    try {
+        isLogin(__dzq).then(isLoginResult => {
 
-        // 查询每日任务完成状态 未完成的执行相应操作
-        getTheDailyTaskState(__dzq).then(result => {
-            console.log(result)
-            if (result.length === 1 || result.length <= 7 || result === []) {
-                getPostRequestId(__dzq).then((requestData) => {
-                    changeLikeState(requestData, true)
-                })
+            // 访客状态提示登录
+            if (!isLoginResult) {
 
-                getTopicsTag(__dzq).then((requestData) => {
-                    createPost(__dzq, requestData)
-                })
-            }else {
-               console.log(['每日任务已完成', result])
+                setTimeout(()=>{
+
+                    alert('当前处与访客状态请登录！')
+
+                }, 2000)
+
+                return
             }
+
+            // 查询每日任务完成状态 未完成的执行相应操作
+            getTheDailyTaskState(__dzq).then(result => {
+
+                console.log(result)
+
+                if (result.length === 1 || result.length <= 5 || result === []) {
+
+                    getPostRequestId(__dzq).then((requestData) => {
+
+                        changeLikeState(requestData, true)
+
+                    })
+
+                    getTopicsTag(__dzq).then((requestData) => {
+
+                        createPost(__dzq, requestData)
+
+                    })
+                }else {
+
+                    console.log('每日任务已完成')
+
+                }
+            })
         })
-    })
+    }
+    catch( err ){
+        console.log(err)
+    }
 
 })();
